@@ -11,6 +11,29 @@ type Day struct {
 	SolarMidnight time.Time
 }
 
+func (d *Day) IsDaytime(t time.Time) bool {
+	// if current time is between sunrise and sunset, it's daytime
+	if t.After(d.GetSunrise()) && t.Before(d.GetSunset()) {
+		return true
+	}
+	return false
+}
+
+func (d *Day) IsNighttime(t time.Time) bool {
+	if t.After(d.GetSunset()) || t.Before(d.GetSunrise()) {
+		return true
+	}
+	return false
+}
+
+func (d *Day) GetSunrise() time.Time {
+	return d.Sunrise
+}
+
+func (d *Day) GetSunset() time.Time {
+	return d.Sunset
+}
+
 func (d *Day) SetDawn(t time.Time) {
 	d.Dawn = t
 	return
