@@ -1,0 +1,4 @@
+github.com/bradfitz/latlong v0.0.0-20170410180902-f3db6d0dff40 h1:wsnz4B2CSHJ09pwtMReU/GRqWDsI7XSasq7Nphem3Xk=
+github.com/bradfitz/latlong v0.0.0-20170410180902-f3db6d0dff40/go.mod h1:ZcXX9BndVQx6Q/JM6B8x7dLE9sl20S+TQsv4KO7tEQk=
+github.com/sixdouglas/suncalc v0.0.0-20190521105718-f30ff7e4f358 h1:4kIllX8/oKon0T0gRuu17X2D50YUu778BntHOmkob0E=
+github.com/sixdouglas/suncalc v0.0.0-20190521105718-f30ff7e4f358/go.mod h1:ctXSBgptEtL2uJFx2AFA4YkqSbkji1RL5H3u/CX3C7w=
