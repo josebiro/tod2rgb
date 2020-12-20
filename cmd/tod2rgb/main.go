@@ -7,11 +7,14 @@ import (
 	"strconv"
 	"time"
 
-	day "github.com/josebiro/tod2rgb/pkg/day"
-
 	"github.com/bradfitz/latlong"
+	day "github.com/josebiro/tod2rgb/pkg/day"
 	"github.com/sixdouglas/suncalc"
+	flag "github.com/spf13/pflag"
 )
+
+// Flags
+var debug bool
 
 func LocaltimeFromLatLong(lat, long float64) (time.Time, error) {
 	tz := latlong.LookupZoneName(lat, long)
@@ -34,11 +37,21 @@ func PrettyPrint(v interface{}) (err error) {
 	return
 }
 
+func init() {
+	flag.BoolVar(&debug, "debug", false, "Turn on debug logging")
+}
+
 func main() {
 	// tod2rgb - take geo lat long as input and return the rgb of daylight color temp.
 	/* 	The principle behind this comes fromm
 	TODO: Link to blog
 	*/
+
+	flag.Parse()
+
+	if debug {
+		fmt.Println("*** Debug output is on.")
+	}
 
 	d := day.NewDay()
 
@@ -65,7 +78,9 @@ func main() {
 	d.SetSolarMidnight(times["nadir"].Time)
 	d.SetCurrent(target_time)
 
-	PrettyPrint(d)
+	if debug {
+		PrettyPrint(d)
+	}
 
 	fmt.Println("Daytime: ", d.IsDaytime(target_time))
 	fmt.Println("Nighttime: ", d.IsNighttime(target_time))
