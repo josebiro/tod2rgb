@@ -3,6 +3,8 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"net/http"
 	"os"
 	"strconv"
 	"time"
@@ -10,6 +12,7 @@ import (
 	"github.com/bradfitz/latlong"
 	day "github.com/josebiro/tod2rgb/pkg/day"
 	"github.com/josebiro/tod2rgb/pkg/kelvin"
+	log "github.com/sirupsen/logrus"
 	"github.com/sixdouglas/suncalc"
 	flag "github.com/spf13/pflag"
 )
@@ -18,11 +21,13 @@ import (
 var debug bool
 var lat float64
 var long float64
+var host string
 
 func init() {
 	flag.BoolVar(&debug, "debug", false, "Turn on debug logging")
 	flag.Float64Var(&lat, "lat", 1234, "Lattitude of target location")
 	flag.Float64Var(&long, "long", 1234, "Longitude of target location.")
+	flag.StringVar(&host, "host", "1.2.3.4", "WLED Controller IP addr or host name.")
 }
 
 func main() {
@@ -36,29 +41,30 @@ func main() {
 	flag.Parse()
 
 	if debug {
-		fmt.Println("*** Debug output is on.")
-		fmt.Println("*** Flags: ")
-		fmt.Println("***    debug: ", debug)
-		fmt.Println("***    lat: ", lat)
-		fmt.Println("***    long: ", long)
+		log.SetLevel(log.DebugLevel)
+		log.Debug("Debug output is on.")
+		log.Debug("Flags: ")
+		log.Debug("--debug: ", debug)
+		log.Debug("--lat: ", lat)
+		log.Debug("--long: ", long)
 	}
 
 	if lat == 1234 {
 		lat, err = strconv.ParseFloat(os.Getenv("LAT"), 64)
 		if err != nil {
-			fmt.Println("ERROR: No Lattitude defined; ", err)
+			log.Fatal("ERROR: No Lattitude defined; ", err)
 		}
 	}
 	if long == 1234 {
 		long, err = strconv.ParseFloat(os.Getenv("LONG"), 64)
 		if err != nil {
-			fmt.Println("ERROR: No longitude defined; ", err)
+			log.Fatal("ERROR: No longitude defined; ", err)
 		}
 	}
 
 	if debug {
-		fmt.Println("*** Lattitude: ", lat)
-		fmt.Println("*** Longitude: ", long)
+		log.Debug("Lattitude: ", lat)
+		log.Debug("Longitude: ", long)
 	}
 
 	d := day.NewDay()
@@ -66,15 +72,14 @@ func main() {
 	// convert lat long to timezone local time
 	targetTime, err := LocaltimeFromLatLong(lat, long)
 	if err != nil {
-		fmt.Println(err)
+		log.Fatal(err)
 	}
 	if debug {
-		fmt.Println(targetTime)
+		log.Debug(targetTime)
 	}
 
 	// convert local time to RGB color value
 	times := suncalc.GetTimes(targetTime, lat, long)
-	//PrettyPrint(times)
 
 	d.SetDawn(times["dawn"].Time)
 	d.SetSunrise(times["sunrise"].Time)
@@ -85,11 +90,10 @@ func main() {
 	d.SetCurrent(targetTime)
 
 	if debug {
-		PrettyPrint(d)
-		fmt.Println("Daytime: ", d.IsDaytime(targetTime))
-		fmt.Println("Nighttime: ", d.IsNighttime(targetTime))
-		fmt.Println("Current Phase: ", d.Between())
-
+		log.Debug(d)
+		log.Debug("Daytime: ", d.IsDaytime(targetTime))
+		log.Debug("Nighttime: ", d.IsNighttime(targetTime))
+		log.Debug("Current Phase: ", d.Between())
 	}
 
 	/*
@@ -101,10 +105,28 @@ func main() {
 	currentKelvin := d.CurrentKelvin()
 	c := kelvin.KelvinToRGB(currentKelvin)
 	if debug {
-		fmt.Println("Current Kelvin: ", currentKelvin)
+		log.Debug("Current Kelvin: ", currentKelvin)
 	}
 	// JSON output of RGB color for current kelvin temperature (or blue for night)
-	PrettyPrint(c)
+	log.Debug(c)
+
+	url := fmt.Sprintf("http://%s/win&R=%v&G=%v&B=%v", host, c.Red, c.Green, c.Blue)
+
+	log.Debug(url)
+
+	resp, err := http.Get(url)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode == http.StatusOK {
+		bodyBytes, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			log.Fatal(err)
+		}
+		bodyString := string(bodyBytes)
+		log.Info(bodyString)
+	}
 }
 
 func LocaltimeFromLatLong(lat, long float64) (time.Time, error) {
@@ -117,7 +139,7 @@ func LocaltimeFromLatLong(lat, long float64) (time.Time, error) {
 	}
 	target_time := time_utc.In(location)
 	if debug {
-		fmt.Println("TZ: ", location, " Time: ", target_time)
+		log.Debug("TZ: ", location, " Time: ", target_time)
 	}
 	return target_time, nil
 }
@@ -125,7 +147,7 @@ func LocaltimeFromLatLong(lat, long float64) (time.Time, error) {
 func PrettyPrint(v interface{}) (err error) {
 	b, err := json.MarshalIndent(v, "", "  ")
 	if err == nil {
-		fmt.Println(string(b))
+		log.Error(string(b))
 	}
 	return
 }

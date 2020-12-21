@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/josebiro/tod2rgb/pkg/kelvin"
+	log "github.com/sirupsen/logrus"
 )
 
 // Day - struct that carries times for day events
@@ -183,7 +184,7 @@ func (d *Day) CurrentKelvin() float64 {
 		phaseEnd := d.GetSolarNoon()
 		return d.GetKelvin(phaseStart, phaseEnd, kStart, kEnd)
 	default:
-		fmt.Println("ERROR: should not have reached here. cp=", cp)
+		log.Error("ERROR: should not have reached here. cp=", cp)
 		return 0
 	} // Daylight phases return kelvin temp for time of day
 	return 0
