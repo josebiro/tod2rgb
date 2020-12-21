@@ -193,7 +193,6 @@ func (d *Day) CurrentKelvin() float64 {
 func (d *Day) GetKelvin(st time.Time, et time.Time, sk float64, ek float64) float64 {
 	diff := et.Sub(st)
 	rDiff := diff.Round(time.Minute)
-	fmt.Println("Phase Duration: ", diff)
 	fmt.Println("Phase Duration in Minutes: ", rDiff.Minutes())
 	kDiff := ek - sk
 	fmt.Println("Phase Kelvin Diff: ", kDiff)
@@ -205,7 +204,7 @@ func (d *Day) GetKelvin(st time.Time, et time.Time, sk float64, ek float64) floa
 	fmt.Println("Phase Complete (percent): ", percentPhaseComplete)
 	kelvinPercent := float64(kDiff) * percentPhaseComplete
 	fmt.Println("Kelvin Value: ", int(float64(sk)+kelvinPercent))
-	return 0
+	return float64(sk) + kelvinPercent
 }
 
 func NewDay() *Day {

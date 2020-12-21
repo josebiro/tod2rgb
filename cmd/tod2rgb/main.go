@@ -91,6 +91,7 @@ func main() {
 
 	if debug {
 		log.Debug(d)
+		PrettyPrint(d)
 		log.Debug("Daytime: ", d.IsDaytime(targetTime))
 		log.Debug("Nighttime: ", d.IsNighttime(targetTime))
 		log.Debug("Current Phase: ", d.Between())
@@ -109,6 +110,7 @@ func main() {
 	}
 	// JSON output of RGB color for current kelvin temperature (or blue for night)
 	log.Debug(c)
+	PrettyPrint(c)
 
 	url := fmt.Sprintf("http://%s/win&R=%v&G=%v&B=%v", host, c.Red, c.Green, c.Blue)
 
