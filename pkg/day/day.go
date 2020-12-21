@@ -3,6 +3,8 @@ package day
 import (
 	"fmt"
 	"time"
+
+	"github.com/josebiro/tod2rgb/pkg/kelvin"
 )
 
 // Day - struct that carries times for day events
@@ -146,36 +148,48 @@ func (d *Day) Between() string {
 	return "unknown"
 }
 
-func (d *Day) CurrentKelvin() int {
-	cp := d.Between()
-	if cp == "midnight-to-dawn" || cp == "dusk-to-midnight" {
-		// Night phases return static night values
-		phase_start := d.GetDusk()
-		phase_end := d.GetNextSolarMidnight()
-		k_start := 2400
-		k_end := 2700
-		return d.GetKelvin(phase_start, phase_end, k_start, k_end)
-		//return 0
-	} else if cp == "dawn-to-sunrise" {
+func (d *Day) CurrentKelvin() float64 {
+	var kStart float64
+	var kEnd float64
+
+	switch cp := d.Between(); cp {
+	case "midnight-to-dawn":
+		return kelvin.Night
+	case "dusk-to-midnight":
+		return kelvin.Night
+	case "dawn-to-sunrise":
 		// dawn to sunrise == 2400k to 2700k
-		k_start := 2400
-		k_end := 2700
-		phase_start := d.GetDawn()
-		phase_end := d.GetSunrise()
-		return d.GetKelvin(phase_start, phase_end, k_start, k_end)
-		// and brightness from 0 to 255
-	} else if cp == "sunrise-to-noon" {
-		k_start := 2700
-		k_end := 6500
-		phase_start := d.GetSunrise()
-		phase_end := d.GetSolarNoon()
-		return d.GetKelvin(phase_start, phase_end, k_start, k_end)
-	}
-	// Daylight phases return kelvin temp for time of day
+		kStart = 2400
+		kEnd = 2700
+		phaseStart := d.GetDawn()
+		phaseEnd := d.GetSunrise()
+		return d.GetKelvin(phaseStart, phaseEnd, kStart, kEnd)
+	case "sunrise-to-noon":
+		kStart = 2700
+		kEnd = 6500
+		phaseStart := d.GetSunrise()
+		phaseEnd := d.GetSolarNoon()
+		return d.GetKelvin(phaseStart, phaseEnd, kStart, kEnd)
+	case "noon-to-sunset":
+		kStart = 6500
+		kEnd = 2700
+		phaseStart := d.GetSunrise()
+		phaseEnd := d.GetSolarNoon()
+		return d.GetKelvin(phaseStart, phaseEnd, kStart, kEnd)
+	case "sunset-to-dusk":
+		kStart = 2700
+		kEnd = 2400
+		phaseStart := d.GetSunrise()
+		phaseEnd := d.GetSolarNoon()
+		return d.GetKelvin(phaseStart, phaseEnd, kStart, kEnd)
+	default:
+		fmt.Println("ERROR: should not have reached here. cp=", cp)
+		return 0
+	} // Daylight phases return kelvin temp for time of day
 	return 0
 }
 
-func (d *Day) GetKelvin(st time.Time, et time.Time, sk int, ek int) int {
+func (d *Day) GetKelvin(st time.Time, et time.Time, sk float64, ek float64) float64 {
 	diff := et.Sub(st)
 	rDiff := diff.Round(time.Minute)
 	fmt.Println("Phase Duration: ", diff)
