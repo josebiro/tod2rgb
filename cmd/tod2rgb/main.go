@@ -68,7 +68,9 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Println(targetTime)
+	if debug {
+		fmt.Println(targetTime)
+	}
 
 	// convert local time to RGB color value
 	times := suncalc.GetTimes(targetTime, lat, long)
@@ -84,26 +86,25 @@ func main() {
 
 	if debug {
 		PrettyPrint(d)
+		fmt.Println("Daytime: ", d.IsDaytime(targetTime))
+		fmt.Println("Nighttime: ", d.IsNighttime(targetTime))
+		fmt.Println("Current Phase: ", d.Between())
+
 	}
 
-	fmt.Println("Daytime: ", d.IsDaytime(targetTime))
-	fmt.Println("Nighttime: ", d.IsNighttime(targetTime))
+	/*
+		 TODO: eventually add moon phases and brightness controls
+		moon_illum := suncalc.GetMoonIllumination(target_time)
+		moon_times := suncalc.GetMoonTimes(target_time, home_lat, home_long, false)
+	*/
 
-	fmt.Println("Current Phase: ", d.Between())
-
-	//moon_illum := suncalc.GetMoonIllumination(target_time)
-	//PrettyPrint(moon_illum)
-
-	//moon_times := suncalc.GetMoonTimes(target_time, home_lat, home_long, false)
-	//PrettyPrint(moon_times)
-
-	// Map time of day to kelvin temp
 	currentKelvin := d.CurrentKelvin()
-	fmt.Println("Current Kelvin: ", currentKelvin)
 	c := kelvin.KelvinToRGB(currentKelvin)
+	if debug {
+		fmt.Println("Current Kelvin: ", currentKelvin)
+	}
+	// JSON output of RGB color for current kelvin temperature (or blue for night)
 	PrettyPrint(c)
-
-	// return rgb color values
 }
 
 func LocaltimeFromLatLong(lat, long float64) (time.Time, error) {
@@ -115,7 +116,9 @@ func LocaltimeFromLatLong(lat, long float64) (time.Time, error) {
 		return time_utc, err
 	}
 	target_time := time_utc.In(location)
-	fmt.Println("TZ: ", location, " Time: ", target_time)
+	if debug {
+		fmt.Println("TZ: ", location, " Time: ", target_time)
+	}
 	return target_time, nil
 }
 
