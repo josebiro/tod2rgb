@@ -146,7 +146,7 @@ func (d *Day) Between() string {
 	return "unknown"
 }
 
-func (d *Day) Kelvin() int {
+func (d *Day) CurrentKelvin() int {
 	cp := d.Between()
 	if cp == "midnight-to-dawn" || cp == "dusk-to-midnight" {
 		// Night phases return static night values
