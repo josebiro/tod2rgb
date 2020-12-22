@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/bradfitz/latlong"
+	"github.com/josebiro/tod2rgb/pkg/color"
 	day "github.com/josebiro/tod2rgb/pkg/day"
 	"github.com/josebiro/tod2rgb/pkg/kelvin"
 	log "github.com/sirupsen/logrus"
@@ -22,12 +23,14 @@ var debug bool
 var lat float64
 var long float64
 var host string
+var interval int
 
 func init() {
 	flag.BoolVar(&debug, "debug", false, "Turn on debug logging")
 	flag.Float64Var(&lat, "lat", 1234, "Lattitude of target location")
 	flag.Float64Var(&long, "long", 1234, "Longitude of target location.")
-	flag.StringVar(&host, "host", "aquarium", "WLED Controller IP addr or host name.")
+	flag.StringVar(&host, "host", "1.2.3.4", "WLED Controller IP addr or host name.")
+	flag.IntVar(&interval, "interval", 0, "Update interval in minutes.")
 }
 
 func main() {
@@ -47,6 +50,7 @@ func main() {
 		log.Debug("--debug: ", debug)
 		log.Debug("--lat: ", lat)
 		log.Debug("--long: ", long)
+		log.Debug("--interval: ", interval)
 	}
 
 	if lat == 1234 {
@@ -67,6 +71,47 @@ func main() {
 		log.Debug("Longitude: ", long)
 	}
 
+	if interval == 0 {
+		c := GetKelvinColor(lat, long)
+		url := fmt.Sprintf("http://%s/win&R=%v&G=%v&B=%v", host, c.Red, c.Green, c.Blue)
+		log.Debug(url)
+		err := UpdateWled(url)
+		if err != nil {
+			log.Fatal(err)
+		}
+	} else {
+		log.Info("Running continually at ", interval, "minute interval.")
+		for {
+			c := GetKelvinColor(lat, long)
+			url := fmt.Sprintf("http://%s/win&R=%v&G=%v&B=%v", host, c.Red, c.Green, c.Blue)
+			log.Debug(url)
+			err := UpdateWled(url)
+			if err != nil {
+				log.Fatal(err)
+			}
+			time.Sleep(time.Duration(interval) * time.Minute)
+		}
+	}
+}
+
+func UpdateWled(url string) error {
+	resp, err := http.Get(url)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode == http.StatusOK {
+		bodyBytes, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return err
+		}
+		bodyString := string(bodyBytes)
+		log.Info(bodyString)
+	}
+	return nil
+}
+
+func GetKelvinColor(lat, long float64) *color.Color {
 	d := day.NewDay()
 
 	// convert lat long to timezone local time
@@ -108,24 +153,7 @@ func main() {
 		log.Debug("Current Kelvin: ", currentKelvin)
 	}
 	log.Debug(c)
-
-	url := fmt.Sprintf("http://%s/win&R=%v&G=%v&B=%v", host, c.Red, c.Green, c.Blue)
-
-	log.Debug(url)
-
-	resp, err := http.Get(url)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode == http.StatusOK {
-		bodyBytes, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			log.Fatal(err)
-		}
-		bodyString := string(bodyBytes)
-		log.Info(bodyString)
-	}
+	return c
 }
 
 func LocaltimeFromLatLong(lat, long float64) (time.Time, error) {

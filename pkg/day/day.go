@@ -1,7 +1,6 @@
 package day
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/josebiro/tod2rgb/pkg/kelvin"
@@ -187,6 +186,7 @@ func (d *Day) CurrentKelvin() float64 {
 		log.Error("ERROR: should not have reached here. cp=", cp)
 		return 0
 	} // Daylight phases return kelvin temp for time of day
+	log.Error("ERROR: Hit terminator that should not have been hit")
 	return 0
 }
 
@@ -199,10 +199,10 @@ func (d *Day) GetKelvin(st time.Time, et time.Time, sk float64, ek float64) floa
 	c2Diff := et.Sub(d.Current).Round(time.Minute)
 	percentPhaseComplete := cDiff.Minutes() / rDiff.Minutes()
 
-	fmt.Println("Phase Duration in Minutes: ", rDiff.Minutes())
-	fmt.Println("Minutes since phase start: ", cDiff.Minutes())
-	fmt.Println("Minutes until phase end: ", c2Diff.Minutes())
-	fmt.Println("Phase Complete (percent): ", percentPhaseComplete)
+	log.Debug("Phase Duration in Minutes: ", rDiff.Minutes())
+	log.Debug("Minutes since phase start: ", cDiff.Minutes())
+	log.Debug("Minutes until phase end: ", c2Diff.Minutes())
+	log.Debug("Phase Complete (percent): ", percentPhaseComplete)
 	log.Debug("Start Kelvin: ", sk)
 	log.Debug("End Kelvin: ", ek)
 
@@ -210,15 +210,15 @@ func (d *Day) GetKelvin(st time.Time, et time.Time, sk float64, ek float64) floa
 		// morning - sek should be greater than ek
 		kDiff := ek - sk
 		kelvinPercent := float64(kDiff) * percentPhaseComplete
-		fmt.Println("(morning) Phase Kelvin Diff: ", kDiff)
-		fmt.Println("(morning) Kelvin Value: ", int(float64(sk)+kelvinPercent))
+		log.Debug("(morning) Phase Kelvin Diff: ", kDiff)
+		log.Debug("(morning) Kelvin Value: ", int(float64(sk)+kelvinPercent))
 		return float64(sk) + kelvinPercent
 	} else {
 		//Afternoon, ek should be less than sk
 		kDiff := sk - ek
 		kelvinPercent := float64(kDiff) * percentPhaseComplete
-		fmt.Println("(evening) Phase Kelvin Diff: ", kDiff)
-		fmt.Println("(evening) Kelvin Value: ", float64(sk)-kelvinPercent)
+		log.Debug("(evening) Phase Kelvin Diff: ", kDiff)
+		log.Debug("(evening) Kelvin Value: ", float64(sk)-kelvinPercent)
 		return float64(sk) - kelvinPercent
 	}
 	return 0
