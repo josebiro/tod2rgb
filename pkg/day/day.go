@@ -174,14 +174,14 @@ func (d *Day) CurrentKelvin() float64 {
 	case "noon-to-sunset":
 		kStart = 6500
 		kEnd = 2700
-		phaseStart := d.GetSunrise()
-		phaseEnd := d.GetSolarNoon()
+		phaseStart := d.GetSolarNoon()
+		phaseEnd := d.GetSunset()
 		return d.GetKelvin(phaseStart, phaseEnd, kStart, kEnd)
 	case "sunset-to-dusk":
 		kStart = 2700
 		kEnd = 2400
-		phaseStart := d.GetSunrise()
-		phaseEnd := d.GetSolarNoon()
+		phaseStart := d.GetSunset()
+		phaseEnd := d.GetDusk()
 		return d.GetKelvin(phaseStart, phaseEnd, kStart, kEnd)
 	default:
 		log.Error("ERROR: should not have reached here. cp=", cp)
@@ -191,20 +191,37 @@ func (d *Day) CurrentKelvin() float64 {
 }
 
 func (d *Day) GetKelvin(st time.Time, et time.Time, sk float64, ek float64) float64 {
+	log.Debug("Start Time: ", st)
+	log.Debug("End Time: ", et)
 	diff := et.Sub(st)
 	rDiff := diff.Round(time.Minute)
-	fmt.Println("Phase Duration in Minutes: ", rDiff.Minutes())
-	kDiff := ek - sk
-	fmt.Println("Phase Kelvin Diff: ", kDiff)
 	cDiff := d.Current.Sub(st).Round(time.Minute)
-	fmt.Println("Minutes since phase start: ", cDiff.Minutes())
 	c2Diff := et.Sub(d.Current).Round(time.Minute)
-	fmt.Println("Minutes until phase end: ", c2Diff.Minutes())
 	percentPhaseComplete := cDiff.Minutes() / rDiff.Minutes()
+
+	fmt.Println("Phase Duration in Minutes: ", rDiff.Minutes())
+	fmt.Println("Minutes since phase start: ", cDiff.Minutes())
+	fmt.Println("Minutes until phase end: ", c2Diff.Minutes())
 	fmt.Println("Phase Complete (percent): ", percentPhaseComplete)
-	kelvinPercent := float64(kDiff) * percentPhaseComplete
-	fmt.Println("Kelvin Value: ", int(float64(sk)+kelvinPercent))
-	return float64(sk) + kelvinPercent
+	log.Debug("Start Kelvin: ", sk)
+	log.Debug("End Kelvin: ", ek)
+
+	if ek > sk {
+		// morning - sek should be greater than ek
+		kDiff := ek - sk
+		kelvinPercent := float64(kDiff) * percentPhaseComplete
+		fmt.Println("(morning) Phase Kelvin Diff: ", kDiff)
+		fmt.Println("(morning) Kelvin Value: ", int(float64(sk)+kelvinPercent))
+		return float64(sk) + kelvinPercent
+	} else {
+		//Afternoon, ek should be less than sk
+		kDiff := sk - ek
+		kelvinPercent := float64(kDiff) * percentPhaseComplete
+		fmt.Println("(evening) Phase Kelvin Diff: ", kDiff)
+		fmt.Println("(evening) Kelvin Value: ", float64(sk)-kelvinPercent)
+		return float64(sk) - kelvinPercent
+	}
+	return 0
 }
 
 func NewDay() *Day {

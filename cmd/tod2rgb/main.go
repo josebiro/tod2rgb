@@ -27,7 +27,7 @@ func init() {
 	flag.BoolVar(&debug, "debug", false, "Turn on debug logging")
 	flag.Float64Var(&lat, "lat", 1234, "Lattitude of target location")
 	flag.Float64Var(&long, "long", 1234, "Longitude of target location.")
-	flag.StringVar(&host, "host", "1.2.3.4", "WLED Controller IP addr or host name.")
+	flag.StringVar(&host, "host", "aquarium", "WLED Controller IP addr or host name.")
 }
 
 func main() {
@@ -91,7 +91,6 @@ func main() {
 
 	if debug {
 		log.Debug(d)
-		PrettyPrint(d)
 		log.Debug("Daytime: ", d.IsDaytime(targetTime))
 		log.Debug("Nighttime: ", d.IsNighttime(targetTime))
 		log.Debug("Current Phase: ", d.Between())
@@ -108,9 +107,7 @@ func main() {
 	if debug {
 		log.Debug("Current Kelvin: ", currentKelvin)
 	}
-	// JSON output of RGB color for current kelvin temperature (or blue for night)
 	log.Debug(c)
-	PrettyPrint(c)
 
 	url := fmt.Sprintf("http://%s/win&R=%v&G=%v&B=%v", host, c.Red, c.Green, c.Blue)
 
