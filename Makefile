@@ -24,6 +24,8 @@ VERSION ?= $(shell git describe --tags --always --dirty)
 # This version-strategy uses a manual value to set the version string
 #VERSION ?= 1.2.3
 
+PACKAGES ?= apk add tzdata
+
 ###
 ### These variables should not need tweaking.
 ###
@@ -184,6 +186,7 @@ $(CONTAINER_DOTFILES):
 	    -e 's|{ARG_ARCH}|$(ARCH)|g'               \
 	    -e 's|{ARG_OS}|$(OS)|g'                   \
 	    -e 's|{ARG_FROM}|$(BASEIMAGE)|g'          \
+		-e 's|{ARG_PACKAGES}|${PACKAGES}|g'       \
 	    Dockerfile.in > .dockerfile-$(BIN)-$(OS)_$(ARCH)
 	@docker build -t $(REGISTRY)/$(BIN):$(TAG) -f .dockerfile-$(BIN)-$(OS)_$(ARCH) .
 	@docker images -q $(REGISTRY)/$(BIN):$(TAG) > $@

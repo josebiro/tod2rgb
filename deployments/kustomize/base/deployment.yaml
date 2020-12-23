@@ -1,0 +1,46 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: tod2rgb
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: tod2rgb
+  name: tod2rgb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tod2rgb
+  template:
+    metadata:
+      labels:
+        app: tod2rgb
+    spec:
+      serviceAccountName: tod2rgb
+      containers:
+      - image: josebiro/tod2rgb:f55614c-dirty__linux_amd64
+        imagePullPolicy: IfNotPresent
+        name: tod2rgb
+        args:
+        - --interval=1
+        - --debug
+        env:
+        - name: LAT
+          valueFrom:
+            secretKeyRef:
+              name: tod2rgb-config
+              key: lattitude
+        - name: LONG
+          valueFrom:
+            secretKeyRef:
+              name: tod2rgb-config
+              key: longitude
+        - name: HOST
+          valueFrom:
+            secretKeyRef:
+              name: tod2rgb-config
+              key: host

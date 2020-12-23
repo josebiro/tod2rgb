@@ -3,3 +3,5 @@
 /.go
 /.container-*
 /.dockerfile-*
+/deployments/kustomize/overlays/*
+/vendor

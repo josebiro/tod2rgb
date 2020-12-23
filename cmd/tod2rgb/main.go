@@ -47,10 +47,11 @@ func main() {
 		log.SetLevel(log.DebugLevel)
 		log.Debug("Debug output is on.")
 		log.Debug("Flags: ")
-		log.Debug("--debug: ", debug)
-		log.Debug("--lat: ", lat)
-		log.Debug("--long: ", long)
-		log.Debug("--interval: ", interval)
+		log.Debug("--debug=", debug)
+		log.Debug("--host=", host)
+		log.Debug("--lat=", lat)
+		log.Debug("--long=", long)
+		log.Debug("--interval=", interval)
 	}
 
 	if lat == 1234 {
@@ -65,10 +66,17 @@ func main() {
 			log.Fatal("ERROR: No longitude defined; ", err)
 		}
 	}
+	if host == "1.2.3.4" {
+		host, err = os.Getenv("HOST")
+		if err != nil {
+			log.Debug("ERROR: No host defined; ", err)
+		}
+	}
 
 	if debug {
 		log.Debug("Lattitude: ", lat)
 		log.Debug("Longitude: ", long)
+		log.Debug("Host: ", host)
 	}
 
 	if interval == 0 {
