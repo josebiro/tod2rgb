@@ -106,7 +106,7 @@ func UpdateWled(url string) error {
 			return err
 		}
 		bodyString := string(bodyBytes)
-		log.Info(bodyString)
+		log.Debug(bodyString)
 	}
 	return nil
 }
@@ -117,6 +117,7 @@ func GetKelvinColor(lat, long float64) *color.Color {
 	// convert lat long to timezone local time
 	targetTime, err := LocaltimeFromLatLong(lat, long)
 	if err != nil {
+		log.Debug(err)
 		log.Fatal(err)
 	}
 	if debug {
@@ -162,6 +163,7 @@ func LocaltimeFromLatLong(lat, long float64) (time.Time, error) {
 
 	location, err := time.LoadLocation(tz)
 	if err != nil {
+		log.Debug("time_utc: ", time_utc, " err: ", err)
 		return time_utc, err
 	}
 	target_time := time_utc.In(location)
