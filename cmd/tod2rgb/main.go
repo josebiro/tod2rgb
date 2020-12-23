@@ -67,16 +67,13 @@ func main() {
 		}
 	}
 	if host == "1.2.3.4" {
-		host, err = os.Getenv("HOST")
-		if err != nil {
-			log.Debug("ERROR: No host defined; ", err)
-		}
+		host = os.Getenv("HOST")
+		log.Debug("Host from env: ", host)
 	}
 
 	if debug {
 		log.Debug("Lattitude: ", lat)
 		log.Debug("Longitude: ", long)
-		log.Debug("Host: ", host)
 	}
 
 	if interval == 0 {
