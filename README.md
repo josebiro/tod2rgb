@@ -16,13 +16,26 @@ This application runs in a loop every minute and calculates an RGB value from a 
 
 ## How To
 
-### Run Locally:
+### Usage
+```
+> ./bin/linux_amd64/tod2rgb --help
+Usage of ./bin/linux_amd64/tod2rgb:
+      --debug          Turn on debug logging
+      --host string    WLED Controller IP addr or host name. (default "1.2.3.4")
+      --interval int   Update interval in minutes.
+      --lat float      Lattitude of target location (default 1234)
+      --long float     Longitude of target location. (default 1234)
+pflag: help requested
+```
+
+### Build and Run Locally
+* `go mod download`
 * `make build` will create binaries in `./bin/<platform>/`
 * create or edit `./env.sh` and add environment variables `LAT=<your latitiude>` and `LONG=<your longitude>` then `source env.sh`
 * `./bin/<platform>/tod2rgb`
 * alternatively, you can define lat/long on the command line:
 * `./bin/<platform>/tod2rgb --lat=<your lattitude> --long=<your longitude>`
 
-### Kubernetes (coming soon)
+### Run on Kubernetes (coming soon)
 * TODO: Run on k8s using kustomize.
 
