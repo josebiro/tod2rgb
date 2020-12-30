@@ -22,11 +22,12 @@ spec:
     spec:
       serviceAccountName: tod2rgb
       containers:
-      - image: josebiro/tod2rgb:358743e__linux_amd64
+        - image: josebiro/tod2rgb:v0.1.0__linux_amd64
         imagePullPolicy: IfNotPresent
         name: tod2rgb
         args:
         - --interval=1
+        - --debug
         env:
         - name: LAT
           valueFrom:
