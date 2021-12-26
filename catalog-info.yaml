@@ -1,0 +1,21 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: tod2rgb
+  description: A service that translates time of day to an rgb value and transmits that value to wled.
+  labels:
+    k8s.io/app: tod2rgb
+  annotations:
+    j03.co/service-discovery: tod2rgb
+  tags:
+    - golang
+    - k8s
+  links:
+    - url: https://github.com/josebiro/tod2rgb
+      title: Github Repository
+      icon: dashboard
+spec:
+  type: service
+  lifecycle: production
+  owner: j03-team
+  system: internal-service
